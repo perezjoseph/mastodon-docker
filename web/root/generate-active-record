@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cd /app/www || exit 1
+
+rake db:encryption:init
