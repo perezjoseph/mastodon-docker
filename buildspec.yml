@@ -1,0 +1,54 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 20
+    commands:
+      - echo "Starting the install phase"
+
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin public.ecr.aws/x6j8d4i8
+      - echo "Completed ECR login"
+
+  build:
+    commands:
+      - echo "Starting the build phase"
+      
+      # Build Docker image for /web
+      - echo "Building Docker image for /web"
+      - docker build -t mastodon-web /web
+      - docker tag mastodon-web:latest public.ecr.aws/x6j8d4i8/demos/mastodon-web:latest
+
+      # Build Docker image for /sidekid
+      - echo "Building Docker image for /sidekid"
+      - docker build -t mastodon-sidekid /sidekid
+      - docker tag mastodon-sidekid:latest public.ecr.aws/x6j8d4i8/demos/mastodon-sidekid:latest
+
+      # Build Docker image for /nginx
+      - echo "Building Docker image for /nginx"
+      - docker build -t nginx /nginx
+      - docker tag nginx:latest public.ecr.aws/x6j8d4i8/demos/nginx:latest
+
+      # Build Docker image for /streaming
+      - echo "Building Docker image for /streaming"
+      - docker build -t mastodon-streaming /streaming
+      - docker tag mastodon-streaming:latest public.ecr.aws/x6j8d4i8/demos/mastodon-streaming:latest
+
+  post_build:
+    commands:
+      - echo "Starting the post-build phase"
+
+      # Push Docker images to Amazon ECR
+      - echo "Pushing Docker images to Amazon ECR"
+      - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-web:latest
+      - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-sidekid:latest
+      - docker push public.ecr.aws/x6j8d4i8/demos/nginx:latest
+      - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-streaming:latest
+
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: yes
