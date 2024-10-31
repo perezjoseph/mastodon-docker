@@ -48,7 +48,6 @@ phases:
       - echo "Pushing Docker images to Amazon ECR"
       - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-web:latest
       - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-sidekid:latest
-      - docker push public.ecr.aws/x6j8d4i8/demos/nginx:latest
       - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-streaming:latest
 
 artifacts:
