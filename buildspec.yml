@@ -31,8 +31,8 @@ phases:
       - docker tag mastodon-sidekid:latest public.ecr.aws/x6j8d4i8/demos/mastodon-sidekid
 
       # Build Docker image for /nginx
-      - echo "Building Docker image for /nginx"
-      - docker build -t nginx /nginx
+      - echo "Building Docker image for nginx"
+      - docker build -t nginx nginx
       - docker tag nginx:latest public.ecr.aws/x6j8d4i8/demos/nginx
 
       # Build Docker image for /streaming
