@@ -21,13 +21,13 @@ phases:
       - echo "Starting the build phase"
       
       # Build Docker image for /web
-      - echo "Building Docker image for /web"
-      - docker build -t mastodon-web /web
+      - echo "Building Docker image for web"
+      - docker build -t mastodon-web web
       - docker tag mastodon-web:latest public.ecr.aws/x6j8d4i8/demos/mastodon-web:latest
 
       # Build Docker image for /sidekid
-      - echo "Building Docker image for /sidekid"
-      - docker build -t mastodon-sidekid /sidekid
+      - echo "Building Docker image for sidekid"
+      - docker build -t mastodon-sidekid sidekid
       - docker tag mastodon-sidekid:latest public.ecr.aws/x6j8d4i8/demos/mastodon-sidekid:latest
 
       # Build Docker image for /nginx
@@ -36,8 +36,8 @@ phases:
       - docker tag nginx:latest public.ecr.aws/x6j8d4i8/demos/nginx:latest
 
       # Build Docker image for /streaming
-      - echo "Building Docker image for /streaming"
-      - docker build -t mastodon-streaming /streaming
+      - echo "Building Docker image for streaming"
+      - docker build -t mastodon-streaming streaming
       - docker tag mastodon-streaming:latest public.ecr.aws/x6j8d4i8/demos/mastodon-streaming:latest
 
   post_build:
