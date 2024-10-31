@@ -2,10 +2,13 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      docker: 20
     commands:
       - echo "Starting the install phase"
+      - yum update -y
+      - echo "Ensuring Docker is available..."
+      - nohup /usr/local/bin/dockerd > /tmp/docker.log 2>&1 &
+      - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
+      - echo "Docker started successfully"
 
   pre_build:
     commands:
