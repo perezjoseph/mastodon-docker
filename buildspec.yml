@@ -23,22 +23,22 @@ phases:
       # Build Docker image for /web
       - echo "Building Docker image for web"
       - docker build -t mastodon-web web
-      - docker tag mastodon-web:latest public.ecr.aws/x6j8d4i8/demos/mastodon-web:latest
+      - docker tag mastodon-web:latest public.ecr.aws/x6j8d4i8/demos/mastodon-web
 
       # Build Docker image for /sidekid
       - echo "Building Docker image for sidekid"
       - docker build -t mastodon-sidekid sidekid
-      - docker tag mastodon-sidekid:latest public.ecr.aws/x6j8d4i8/demos/mastodon-sidekid:latest
+      - docker tag mastodon-sidekid:latest public.ecr.aws/x6j8d4i8/demos/mastodon-sidekid
 
       # Build Docker image for /nginx
       - echo "Building Docker image for /nginx"
       - docker build -t nginx /nginx
-      - docker tag nginx:latest public.ecr.aws/x6j8d4i8/demos/nginx:latest
+      - docker tag nginx:latest public.ecr.aws/x6j8d4i8/demos/nginx
 
       # Build Docker image for /streaming
       - echo "Building Docker image for streaming"
       - docker build -t mastodon-streaming streaming
-      - docker tag mastodon-streaming:latest public.ecr.aws/x6j8d4i8/demos/mastodon-streaming:latest
+      - docker tag mastodon-streaming:latest public.ecr.aws/x6j8d4i8/demos/mastodon-streaming
 
   post_build:
     commands:
@@ -46,9 +46,10 @@ phases:
 
       # Push Docker images to Amazon ECR
       - echo "Pushing Docker images to Amazon ECR"
-      - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-web:latest
-      - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-sidekid:latest
-      - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-streaming:latest
+      - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-web
+      - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-sidekid
+      - docker push public.ecr.aws/x6j8d4i8/demos/nginx
+      - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-streaming
 
 artifacts:
   files:
