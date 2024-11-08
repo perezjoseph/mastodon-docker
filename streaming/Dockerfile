@@ -39,7 +39,6 @@ WORKDIR /home/mastodon/live
 
 # Install JavaScript dependencies for streaming
 RUN yarn install --pure-lockfile
-COPY public/ /home/mastodon/live/
 
 # Expose port for the streaming service
 EXPOSE 4000
