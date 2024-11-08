@@ -38,7 +38,7 @@ RUN git clone https://github.com/mastodon/mastodon.git live && \
 WORKDIR /home/mastodon/live
 
 # Install JavaScript dependencies for streaming
-RUN yarn install --pure-lockfile
+RUN yarn install --immutable
 
 # Expose port for the streaming service
 EXPOSE 4000
