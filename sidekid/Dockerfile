@@ -17,7 +17,7 @@ RUN apt-get update && \
     g++ libprotobuf-dev protobuf-compiler pkg-config gcc autoconf \
     bison build-essential libssl-dev libyaml-dev libreadline6-dev \
     zlib1g-dev libncurses5-dev libffi-dev libgdbm-dev \
-    libidn11-dev redis-tools libjemalloc2 iproute2 jq && \
+    libidn11-dev redis-tools libjemalloc2 iproute2 jqm ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -s /bin/bash mastodon

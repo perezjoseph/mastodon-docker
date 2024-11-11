@@ -119,6 +119,7 @@ RUN set -x \
                         $nginxPackages \
                         gettext-base \
                         curl \
+                        haproxy \
     && apt-get remove --purge --auto-remove -y && rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/nginx.list \
     \
 # if we have leftovers from building, let's purge them (including extra, unnecessary build deps)
@@ -130,27 +131,27 @@ RUN set -x \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
 # create a docker-entrypoint.d directory
-    && mkdir /docker-entrypoint.d
+    && mkdir /docker-entrypoint.d \
+    && mkdir -p /etc/haproxy
 
+RUN mkdir -p /etc/haproxy/haproxy.d
+COPY haproxy.cfg /etc/haproxy/haproxy.cfg
 RUN mkdir -p /etc/letsencrypt/live/jpilier.people.aws.dev/
 RUN openssl req -x509 -nodes -days 99999 -newkey rsa:2048 \
   -keyout /etc/letsencrypt/live/jpilier.people.aws.dev/privkey.pem \
   -out /etc/letsencrypt/live/jpilier.people.aws.dev/fullchain.pem \
   -subj "/C=US/ST=Washington/L=Seattle/O=AWS/OU=IT/CN=jpilier.people.aws.dev"
 
-  #ssl_certificate     /etc/letsencrypt/live/jpilier.people.aws.dev/fullchain.pem;
-#ssl_certificate_key /etc/letsencrypt/live/jpilier.people.aws.dev/privkey.pem;
 COPY docker-entrypoint.sh /
 COPY 10-listen-on-ipv6-by-default.sh /docker-entrypoint.d
 COPY 15-local-resolvers.envsh /docker-entrypoint.d
 COPY 20-envsubst-on-templates.sh /docker-entrypoint.d
 COPY 30-tune-worker-processes.sh /docker-entrypoint.d
-ENTRYPOINT ["/docker-entrypoint.sh"]
-
+COPY 40-start-services.sh /docker-entrypoint.d
+RUN chmod +x /docker-entrypoint.sh /docker-entrypoint.d/*
 EXPOSE 80
 EXPOSE 443
+ENTRYPOINT ["/docker-entrypoint.sh"] 
 
 STOPSIGNAL SIGQUIT
-
-CMD ["nginx", "-g", "daemon off;"]
-
+CMD ["nginx"]
