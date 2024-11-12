@@ -1,3 +1,3 @@
 #!/bin/bash
 
-exec /home/mastodon/.rbenv/shims/bundle exec sidekiq -c 25
+exec bundle exec sidekiq -c 25

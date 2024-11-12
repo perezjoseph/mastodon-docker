@@ -88,7 +88,7 @@ RUN git clone https://github.com/mastodon/mastodon.git live && \
     git checkout $(git tag -l | grep '^v[0-9.]*$' | sort -V | tail -n 1)
 
 WORKDIR /home/mastodon/live
-
+COPY rack_attack.rb /home/mastodon/live/config/initializers
 # Install Ruby and JavaScript dependencies in production mode
 RUN bundle config set deployment 'true' && \
     bundle config set without 'development test' && \
