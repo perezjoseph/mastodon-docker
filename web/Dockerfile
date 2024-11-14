@@ -86,9 +86,8 @@ ENV PATH="/home/mastodon/.rbenv/shims:/home/mastodon/.rbenv/bin:$PATH"
 RUN git clone https://github.com/mastodon/mastodon.git live && \
     cd live && \
     git checkout $(git tag -l | grep '^v[0-9.]*$' | sort -V | tail -n 1)
-
 WORKDIR /home/mastodon/live
-COPY rack_attack.rb /home/mastodon/live/config/initializers
+RUN sed -i "/gem 'rack-attack'/d" Gemfile && sed -i "/config.middleware.use Rack::Attack/d" config/application.rb && rm config/initializers/rack_attack.rb && bundle config set frozen 'false' && sed -i "/with_rate_limit:/d" app/controllers/api/v1/statuses_controller.rb
 # Install Ruby and JavaScript dependencies in production mode
 RUN bundle config set deployment 'true' && \
     bundle config set without 'development test' && \
@@ -150,6 +149,7 @@ ENV PATH="/home/mastodon/.rbenv/shims:/home/mastodon/.rbenv/bin:$PATH"
 COPY --from=builder /home/mastodon/live /home/mastodon/live
 
 USER root
+RUN find /home/mastodon -print0 | xargs -0 -P 40 chown mastodon:mastodon
 RUN mkdir /docker-entrypoint.d
 COPY entrypoint.sh /docker-entrypoint.d/
 COPY cmd-wrapper.sh /docker-entrypoint.d/
@@ -157,7 +157,7 @@ COPY secrets.sh /docker-entrypoint.d/
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.d/cmd-wrapper.sh /docker-entrypoint.d/secrets.sh /docker-entrypoint.d/entrypoint.sh /docker-entrypoint.sh && \
     rm -rf /home/mastodon/.bundle/cache /home/mastodon/live/node_modules/.cache && \
-    yarn cache clean && apt-get clean
+    yarn cache clean --all && apt-get clean
 WORKDIR /home/mastodon/live
 
 

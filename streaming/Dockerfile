@@ -34,6 +34,7 @@ WORKDIR /home/mastodon
 RUN git clone https://github.com/mastodon/mastodon.git live && \
     cd live && \
     git checkout $(git tag -l | grep '^v[0-9.]*$' | sort -V | tail -n 1)
+COPY rack_attack.rb /home/mastodon/live/config/initializers/rack_attack.rb 
 
 WORKDIR /home/mastodon/live
 

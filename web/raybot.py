@@ -1,5 +1,4 @@
 import os
-import random
 import time
 import requests
 import ray
@@ -7,135 +6,92 @@ from PIL import Image
 from io import BytesIO
 from mastodon import Mastodon
 from google_images_search import GoogleImagesSearch
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from requests.exceptions import RequestException
 
 # Initialize Ray
-ray.init(address='auto')
+ray.shutdown()
+ray.init(
+    address='auto',
+    runtime_env={"pip": ["pillow"]}
+)
 
 # Mastodon authentication
 mastodon = Mastodon(
-    access_token='OdSykCOA3kVNlN-TKO2ffUkwk8Fx8i1Oy0yt1bMT2b4',
+    access_token='9sa3dxQldRpAqfQox9koBPAifsBuRGYcYft7h3iqbh8',
     api_base_url='https://jpilier.people.aws.dev'
 )
 
 # Google API setup
-google_api_key = 'AIzaSyDLQF7SbgiV-IukMzhAlm-Rn14cG6BeoD0'
+google_api_key = 'AIzaSyAY8J106jHpfiOwGC_F1tqYYbpJP4a_Bng'
 google_cse_id = '85095de07bf394f77'
 gis = GoogleImagesSearch(google_api_key, google_cse_id)
 
-# Download and convert image to BytesIO
-def download_and_convert_image(image_url, search_term, index):
+# Function to download, process, and post a single image, now a Ray task
+@ray.remote(num_cpus=0.25)
+def download_process_post_image(image_url, search_term):
     try:
-        # Check the file extension
+        # Skip SVG images
         if image_url.lower().endswith('.svg'):
-            print(f"Skipping SVG file: {image_url}")
-            return None
+            return
 
-        response = requests.get(image_url)
+        response = requests.get(image_url, timeout=5)
         response.raise_for_status()
-
-        # Check the content type for SVG
         if 'image/svg+xml' in response.headers.get('Content-Type', ''):
-            print(f"Skipping SVG file based on Content-Type: {image_url}")
-            return None
+            return
 
         img = Image.open(BytesIO(response.content))
-        
-        # Convert to JPEG and store in BytesIO
+        img = img.convert("RGB")
+        img.thumbnail((800, 800))  # Resize to max 800x800 pixels
+
+        # Convert to JPEG
         img_byte_array = BytesIO()
-        img.convert("RGB").save(img_byte_array, format="JPEG")
+        img.save(img_byte_array, format="JPEG", quality=85)
         img_byte_array.seek(0)
-        
-        print(f"Downloaded and converted image for term '{search_term}' (index {index})")
-        return img_byte_array
-    except Exception as e:
-        print(f"Failed to download and convert image from {image_url}: {e}")
-        return None
-# Search and download images
-@ray.remote
-def download_images(search_term):
-    try:
-        print(f"Searching for images with term: {search_term}")
-        gis.search({'q': search_term, 'num': 3, 'fileType': 'jpg|png|gif'})
 
-        if not gis.results():
-            print(f"No images found for {search_term}")
-            return []
-
-        image_files = []
-        with ThreadPoolExecutor() as executor:
-            futures = [
-                executor.submit(download_and_convert_image, image.url, search_term, index)
-                for index, image in enumerate(gis.results())
-            ]
-            for future in as_completed(futures):
-                img_byte_array = future.result()
-                if img_byte_array:
-                    image_files.append(img_byte_array)
-
-        return image_files
-    except Exception as e:
-        print(f"Error downloading images for {search_term}: {e}")
-        return []
-
-# Post image to Mastodon with retry logic
-@ray.remote
-def post_image(img_byte_array):
-    print("Attempting to post image")
-    try:
-        delay = 2
-        max_delay = 300
-
+        # Post image to Mastodon
+        delay, max_delay = 2, 300
         while True:
             try:
-                # Prepare the in-memory image for Mastodon
                 media = mastodon.media_post(
                     media_file=img_byte_array,
                     mime_type="image/jpeg",
-                    description='A randomly selected image from Google Images'
+                    description=f'A randomly selected image for {search_term}'
                 )
-                if media:
-                    break
+                media_id = media['id']
+                status = mastodon.status_post(
+                    status=f'Here is a new image for {search_term}!',
+                    media_ids=[media_id],
+                    visibility='private'
+                )
+                print(f"Posted status: {status['id']} for {search_term}")
+                break
             except RequestException as e:
-                print(f"Media post attempt failed: {e}")
-                print(f"Retrying in {delay} seconds...")
+                print(f"Media post failed for {search_term}: {e}. Retrying in {delay}s.")
                 time.sleep(delay)
                 delay = min(delay * 2, max_delay)
-
-        media_id = media['id']
-        status = mastodon.status_post(
-            status='Here is a new image!',
-            media_ids=[media_id]
-        )
-
-        print("Status post response:")
-        print(f"  Status ID: {status['id']}")
-        print(f"  Created At: {status['created_at']}")
-        print(f"  URL: {status['url']}")
-        print(f"  Content: {status['content']}")
-
     except Exception as e:
-        print(f"Unexpected error posting image: {e}")
+        print(f"Error processing image from {image_url} for {search_term}: {e}")
 
-# Post all images concurrently
-def post_all_images_concurrently(image_files):
-    if not image_files:
-        print("No images found to post.")
-        return
+# Ray task for concurrent downloading, processing, and posting images for each search term
+@ray.remote(num_cpus=0.01)  # Adjust CPU usage as needed
+def process_images_for_term(search_term):
+    try:
+        # Search for images using Google Images Search API
+        gis.search({'q': search_term, 'num': 1, 'fileType': 'jpg|png|gif'})  # Fetch only one image
+        image_urls = [image.url for image in gis.results()]
 
-    with ThreadPoolExecutor() as executor:
-        futures = [executor.submit(post_image.remote, img_byte_array) for img_byte_array in image_files]
-        for future in as_completed(futures):
-            try:
-                future.result()
-            except Exception as e:
-                print(f"Error posting an image: {e}")
+        if image_urls:
+            # Select the first image URL and post it 1000 times using Ray tasks
+            image_url = image_urls[0]
+            tasks = [download_process_post_image.remote(image_url, search_term) for _ in range(1000)]
+            ray.get(tasks)  # Wait for all image posts to complete
+    except Exception as e:
+        print(f"Error in processing images for {search_term}: {e}")
 
 # Main bot functionality
 if __name__ == '__main__':
     dictionary_words = ["data", "technology", "cloud", "serverless", "architecture", "infrastructure", "scalability", "networking"]
+
     while True:
-        random_term = random.choice(dictionary_words)
-        image_files = ray.get(download_images.remote(random_term))
-        post_all_images_concurrently(image_files)
+        futures = [process_images_for_term.remote(term) for term in dictionary_words]
+        ray.get(futures)  # Wait for all tasks to complete before looping again

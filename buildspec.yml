@@ -25,11 +25,6 @@ phases:
       - docker build -t mastodon-web web
       - docker tag mastodon-web:latest public.ecr.aws/x6j8d4i8/demos/mastodon-web
 
-      # Build Docker image for /sidekid
-      - echo "Building Docker image for sidekid"
-      - docker build -t mastodon-sidekid sidekid
-      - docker tag mastodon-sidekid:latest public.ecr.aws/x6j8d4i8/demos/mastodon-sidekid
-
       # Build Docker image for /nginx
       - echo "Building Docker image for nginx"
       - docker build -t nginx nginx
@@ -47,7 +42,6 @@ phases:
       # Push Docker images to Amazon ECR
       - echo "Pushing Docker images to Amazon ECR"
       - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-web
-      - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-sidekid
       - docker push public.ecr.aws/x6j8d4i8/demos/nginx
       - docker push public.ecr.aws/x6j8d4i8/demos/mastodon-streaming
 
