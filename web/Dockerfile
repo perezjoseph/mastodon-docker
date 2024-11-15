@@ -158,50 +158,49 @@ COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.d/cmd-wrapper.sh /docker-entrypoint.d/secrets.sh /docker-entrypoint.d/entrypoint.sh /docker-entrypoint.sh && \
     rm -rf /home/mastodon/.bundle/cache /home/mastodon/live/node_modules/.cache && \
     yarn cache clean --all && apt-get clean
-
-RUN rm -f /lib/x86_64-linux-gnu/libLLVM-15.so.1 \
-/lib/x86_64-linux-gnu/libz3.so.4 \
-/lib/x86_64-linux-gnu/libcodec2.so.1.0 \
-/lib/x86_64-linux-gnu/libx265.so.199 \
-/lib/x86_64-linux-gnu/libmfxhw64.so.1.35 \
-/lib/x86_64-linux-gnu/libplacebo.so.208 \
-/lib/x86_64-linux-gnu/dri/zink_dri.so \
-/home/mastodon/live/.git && \
+RUN rm -fr /lib/x86_64-linux-gnu/libLLVM-15.so.1 \
+    /lib/x86_64-linux-gnu/libz3.so.4 \
+    /lib/x86_64-linux-gnu/libcodec2.so.1.0 \
+    /lib/x86_64-linux-gnu/libx265.so.199 \
+    /lib/x86_64-linux-gnu/libmfxhw64.so.1.35 \
+    /lib/x86_64-linux-gnu/libplacebo.so.208 \
+    /lib/x86_64-linux-gnu/dri/zink_dri.so \
+    /home/mastodon/live/.git && \
 yarn remove @babel/plugin-transform-nullish-coalescing-operator \
-            @babel/plugin-transform-react-inline-elements \
-            @babel/plugin-transform-runtime \
-            @babel/runtime \
-            @svgr/webpack \
-            babel-loader \
-            babel-plugin-lodash \
-            babel-plugin-transform-react-remove-prop-types \
-            core-js \
-            css-loader \
-            file-loader \
-            imports-loader \
-            mark-loader \
-            postcss-loader \
-            punycode \
-            sass-loader \
-            webpack-cli && \
-# Remove unused devDependencies
+          @babel/plugin-transform-react-inline-elements \
+          @babel/plugin-transform-runtime \
+          @babel/runtime \
+          @svgr/webpack \
+          babel-loader \
+          babel-plugin-lodash \
+          babel-plugin-transform-react-remove-prop-types \
+          core-js \
+          css-loader \
+          file-loader \
+          imports-loader \
+          mark-loader \
+          postcss-loader \
+          punycode \
+          sass-loader \
+          webpack-cli && \
 yarn remove @types/babel__core \
-            @types/intl \
-            @types/jest \
-            @types/js-yaml \
-            @types/object-assign \
-            @types/punycode \
-            @types/react-immutable-proptypes \
-            @types/react-swipeable-views \
-            @types/react-test-renderer \
-            @types/webpack \
-            @types/webpack-env \
-            babel-jest \
-            jest-environment-jsdom \
-            lint-staged \
-            stylelint-config-prettier-scss \
-            stylelint-config-standard-scss \
-            webpack-dev-server
+          @types/intl \
+          @types/jest \
+          @types/js-yaml \
+          @types/object-assign \
+          @types/punycode \
+          @types/react-immutable-proptypes \
+          @types/react-swipeable-views \
+          @types/react-test-renderer \
+          @types/webpack \
+          @types/webpack-env \
+          babel-jest \
+          jest-environment-jsdom \
+          lint-staged \
+          stylelint-config-prettier-scss \
+          stylelint-config-standard-scss \
+          webpack-dev-server && \
+yarn cache clean
 WORKDIR /home/mastodon/live
 
 
