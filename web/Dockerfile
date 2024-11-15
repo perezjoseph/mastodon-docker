@@ -156,39 +156,22 @@ COPY cmd-wrapper.sh /docker-entrypoint.d/
 COPY secrets.sh /docker-entrypoint.d/
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.d/cmd-wrapper.sh /docker-entrypoint.d/secrets.sh /docker-entrypoint.d/entrypoint.sh /docker-entrypoint.sh && \
-    rm -rf /home/mastodon/.bundle/cache /home/mastodon/live/node_modules/.cache && \
-    yarn cache clean --all && apt-get clean
+    rm -rf /home/mastodon/.bundle/cache /home/mastodon/live/node_modules/.cache
 
 WORKDIR /home/mastodon/live
 
+# Remove unnecessary libraries, dependencies, and clean Yarn cache
 RUN rm -fr /lib/x86_64-linux-gnu/libLLVM-15.so.1 \
-    /lib/x86_64-linux-gnu/libz3.so.4 \
-    /lib/x86_64-linux-gnu/libcodec2.so.1.0 \
-    /lib/x86_64-linux-gnu/libx265.so.199 \
-    /lib/x86_64-linux-gnu/libmfxhw64.so.1.35 \
-    /lib/x86_64-linux-gnu/libplacebo.so.208 \
-    /lib/x86_64-linux-gnu/dri/zink_dri.so \
-    /home/mastodon/live/.git && \
-yarn remove @babel/plugin-transform-nullish-coalescing-operator \
-          @babel/plugin-transform-react-inline-elements \
-          @babel/plugin-transform-runtime \
-          @babel/runtime \
-          @svgr/webpack \
-          babel-loader \
-          babel-plugin-lodash \
-          babel-plugin-transform-react-remove-prop-types \
-          core-js \
-          css-loader \
-          file-loader \
-          imports-loader \
-          mark-loader \
-          postcss-loader \
-          punycode \
-          sass-loader \
-          webpack-cli && \
-yarn cache clean
-
-
+          /lib/x86_64-linux-gnu/libz3.so.4 \
+          /lib/x86_64-linux-gnu/libcodec2.so.1.0 \
+          /lib/x86_64-linux-gnu/libx265.so.199 \
+          /lib/x86_64-linux-gnu/libmfxhw64.so.1.35 \
+          /lib/x86_64-linux-gnu/libplacebo.so.208 \
+          /lib/x86_64-linux-gnu/dri/zink_dri.so \
+          /home/mastodon/live/.git && \
+          rm -rf /home/mastodon/live/node_modules && \
+          rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+          apt-get clean
 USER mastodon
 EXPOSE 3000
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
