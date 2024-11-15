@@ -158,6 +158,9 @@ COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.d/cmd-wrapper.sh /docker-entrypoint.d/secrets.sh /docker-entrypoint.d/entrypoint.sh /docker-entrypoint.sh && \
     rm -rf /home/mastodon/.bundle/cache /home/mastodon/live/node_modules/.cache && \
     yarn cache clean --all && apt-get clean
+
+WORKDIR /home/mastodon/live
+
 RUN rm -fr /lib/x86_64-linux-gnu/libLLVM-15.so.1 \
     /lib/x86_64-linux-gnu/libz3.so.4 \
     /lib/x86_64-linux-gnu/libcodec2.so.1.0 \
@@ -201,7 +204,6 @@ yarn remove @types/babel__core \
           stylelint-config-standard-scss \
           webpack-dev-server && \
 yarn cache clean
-WORKDIR /home/mastodon/live
 
 
 USER mastodon
