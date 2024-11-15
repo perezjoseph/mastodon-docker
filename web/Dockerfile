@@ -186,23 +186,6 @@ yarn remove @babel/plugin-transform-nullish-coalescing-operator \
           punycode \
           sass-loader \
           webpack-cli && \
-yarn remove @types/babel__core \
-          @types/intl \
-          @types/jest \
-          @types/js-yaml \
-          @types/object-assign \
-          @types/punycode \
-          @types/react-immutable-proptypes \
-          @types/react-swipeable-views \
-          @types/react-test-renderer \
-          @types/webpack \
-          @types/webpack-env \
-          babel-jest \
-          jest-environment-jsdom \
-          lint-staged \
-          stylelint-config-prettier-scss \
-          stylelint-config-standard-scss \
-          webpack-dev-server && \
 yarn cache clean
 
 
