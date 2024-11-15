@@ -158,6 +158,14 @@ COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.d/cmd-wrapper.sh /docker-entrypoint.d/secrets.sh /docker-entrypoint.d/entrypoint.sh /docker-entrypoint.sh && \
     rm -rf /home/mastodon/.bundle/cache /home/mastodon/live/node_modules/.cache && \
     yarn cache clean --all && apt-get clean
+
+RUN rm -f /lib/x86_64-linux-gnu/libLLVM-15.so.1 \
+/lib/x86_64-linux-gnu/libz3.so.4 \
+/lib/x86_64-linux-gnu/libcodec2.so.1.0 \
+/lib/x86_64-linux-gnu/libx265.so.199 \
+/lib/x86_64-linux-gnu/libmfxhw64.so.1.35 \
+/lib/x86_64-linux-gnu/libplacebo.so.208 \
+/lib/x86_64-linux-gnu/dri/zink_dri.so
 WORKDIR /home/mastodon/live
 
 
